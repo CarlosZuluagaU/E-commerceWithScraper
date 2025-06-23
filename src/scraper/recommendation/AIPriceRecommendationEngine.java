@@ -24,18 +24,29 @@ public class AIPriceRecommendationEngine implements RecommendationEngine {
     }
 
     private double calculateProductScore(ProductInfo product, double maxPrice, int maxReviews) {
-        // Normalizamos los valores
-        double normalizedPrice = normalizePrice(product.getCurrentPrice(), maxPrice);
-        double normalizedRating = product.getSafeRating() / 5.0; // Rating 0-5
-        double normalizedPopularity = normalizePopularity(product.getSafeReviewCount(), maxReviews);
+        double priceScore = calculatePriceScore(product, maxPrice);
+        double ratingScore = calculateRatingScore(product);
+        double popularityScore = calculatePopularityScore(product, maxReviews);
 
-        return (PRICE_WEIGHT * normalizedPrice)
-                - (RATING_WEIGHT * normalizedRating)
-                - (POPULARITY_WEIGHT * normalizedPopularity);
+        return (PRICE_WEIGHT * priceScore)
+                - (RATING_WEIGHT * ratingScore)
+                - (POPULARITY_WEIGHT * popularityScore);
+    }
+
+    private double calculatePriceScore(ProductInfo product, double maxPrice) {
+        return normalizePrice(product.getCurrentPrice(), maxPrice);
+    }
+
+    private double calculateRatingScore(ProductInfo product) {
+        return product.getSafeRating() / 5.0; // Normalizado a escala 0-1
+    }
+
+    private double calculatePopularityScore(ProductInfo product, int maxReviews) {
+        return normalizePopularity(product.getSafeReviewCount(), maxReviews);
     }
 
     private double normalizePrice(double price, double maxPrice) {
-        return price / maxPrice;
+        return maxPrice > 0 ? price / maxPrice : 0;
     }
 
     private double normalizePopularity(int reviewCount, int maxReviews) {
@@ -52,5 +63,29 @@ public class AIPriceRecommendationEngine implements RecommendationEngine {
         return products.stream()
                 .mapToInt(ProductInfo::getSafeReviewCount)
                 .max().orElse(0);
+    }
+
+    public void displayAnalysis(ProductInfo product, List<ProductInfo> allProducts) {
+        double maxPrice = getMaxPrice(allProducts);
+        int maxReviews = getMaxReviews(allProducts);
+
+        double priceScore = calculatePriceScore(product, maxPrice);
+        double ratingScore = calculateRatingScore(product);
+        double popularityScore = calculatePopularityScore(product, maxReviews);
+
+        System.out.println("\n📊 ANÁLISIS DE RECOMENDACIÓN:");
+        System.out.println("----------------------------------");
+        System.out.printf("• Precio: %s (Normalizado: %.2f)\n",
+                product.getFormattedPrice(), priceScore);
+        System.out.printf("• Rating: %.1f/5 (Normalizado: %.2f)\n",
+                product.getSafeRating(), ratingScore);
+        System.out.printf("• Popularidad: %d reviews (Normalizado: %.2f)\n",
+                product.getSafeReviewCount(), popularityScore);
+        System.out.println("----------------------------------");
+        System.out.printf("PUNTUACIÓN FINAL: %.2f\n",
+                (PRICE_WEIGHT * priceScore) -
+                        (RATING_WEIGHT * ratingScore) -
+                        (POPULARITY_WEIGHT * popularityScore));
+        System.out.println("(Valores más bajos indican mejor recomendación)");
     }
 }
