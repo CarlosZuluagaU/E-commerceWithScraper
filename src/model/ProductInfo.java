@@ -1,9 +1,6 @@
 package model;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.time.LocalDateTime;
 
 @Data
@@ -19,8 +16,20 @@ public class ProductInfo {
     private LocalDateTime scrapedAt;
     private String seller;
     private boolean inStock;
+    private Double rating;  // Nuevo campo nullable
+    private Integer reviewCount; // Nuevo campo nullable
 
     public String getFormattedPrice() {
         return String.format("$%.2f", currentPrice);
+    }
+
+    // Método seguro para obtener rating
+    public double getSafeRating() {
+        return rating != null ? rating : 0.0;
+    }
+
+    // Método seguro para obtener conteo de reviews
+    public int getSafeReviewCount() {
+        return reviewCount != null ? reviewCount : 0;
     }
 }
