@@ -99,18 +99,31 @@ a:hover {
   padding: 0.5rem 1rem;
 }
 
-/* Hero section */
+/* === CAMBIOS PARA LA IMAGEN DE FONDO === */
 .hero-section {
-  background: linear-gradient(135deg, rgba(67, 97, 238, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
-  padding: 5rem 0;
-  position: relative;
-  overflow: hidden;
+    /* 1. Aplicamos la imagen de fondo con un degradado oscuro encima para legibilidad */
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/hero-bg.webp');
+    background-size: cover;
+    background-position: center;
+
+    /* 2. Ajustamos el texto para que sea legible sobre la imagen */
+    color: #ffffff; /* Hacemos el texto principal blanco */
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Sombra para legibilidad */
+
+    /* 3. Mantenemos tus otros estilos */
+    padding: 5rem 0;
+    position: relative;
+    overflow: hidden;
 }
 
-[data-bs-theme="dark"] .hero-section {
-  background: linear-gradient(135deg, rgba(67, 97, 238, 0.2) 0%, rgba(33, 37, 41, 0) 100%);
+/* El subtítulo se hace un poco más suave */
+[data-bs-theme="dark"] .hero-section .text-muted,
+.hero-section .text-muted {
+    color: #e9ecef !important;
 }
 
+/* El patrón de fondo SVG ya no es necesario con la imagen, así que lo comentamos para evitar un error 404 si no tienes el archivo. */
+/*
 .hero-section::before {
   content: '';
   position: absolute;
@@ -123,6 +136,9 @@ a:hover {
   opacity: 0.03;
   z-index: -1;
 }
+*/
+/* === FIN DE LOS CAMBIOS === */
+
 
 /* Campo de búsqueda */
 #search-form .form-control {

@@ -1,26 +1,35 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Selección de Elementos del DOM ---
+    // --- Elementos del DOM ---
     const searchForm = document.getElementById('search-form');
     const productNameInput = document.getElementById('product-name-input');
-    const searchButton = document.getElementById('search-button');
-    const resultsArea = document.getElementById('results-area');
-    const infoContainer = document.getElementById('info-container');
-    const infoMessage = document.getElementById('info-message');
-    const cardTemplate = document.getElementById('product-card-template');
     const resultsGrid = document.getElementById('results-grid');
     const loadingSpinner = document.getElementById('loading-spinner');
-    const sortDropdown = document.getElementById('sort-dropdown');
+    const infoMessage = document.getElementById('info-message');
+    const cardTemplate = document.getElementById('product-card-template');
+    const resultsCount = document.getElementById('results-count');
 
     // --- Variables de Estado ---
     let currentProducts = [];
     let currentSort = 'price-asc';
 
-    // --- Lógica de Búsqueda (VERSIÓN ACTUALIZADA) ---
-    const startSearch = async (event) => {
-        if (event) event.preventDefault();
+    // --- Event Listeners ---
+    searchForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        await startSearch();
+    });
 
+    document.querySelectorAll('.sort-option').forEach(option => {
+        option.addEventListener('click', (e) => {
+            e.preventDefault();
+            currentSort = e.target.dataset.sort;
+            updateActiveSortButton();
+            sortProducts(currentSort);
+        });
+    });
+
+    // --- Funciones Principales ---
+    const startSearch = async () => {
         const productName = productNameInput.value.trim();
-        console.log("Término de búsqueda:", productName); // Debug 1
 
         if (!productName) {
             showInfoMessage('Por favor, ingresa un nombre de producto.', 'warning');
@@ -30,206 +39,209 @@ document.addEventListener('DOMContentLoaded', () => {
         prepareUIForSearch();
 
         try {
-            const apiUrl = `/api/products/search?name=${encodeURIComponent(productName)}`;
-            console.log("URL de la API:", apiUrl); // Debug 2
-
-            const options = {
-                method: 'GET',
-                headers: {
-                    'Accept': 'application/json'
-                }
-            };
-
-            console.log("Enviando solicitud..."); // Debug 3
-            const response = await fetch(apiUrl, options);
-            console.log("Respuesta recibida. Status:", response.status); // Debug 4
+            console.log("Iniciando búsqueda de:", productName);
+            const response = await fetch(`/api/products/search?name=${encodeURIComponent(productName)}`);
 
             if (!response.ok) {
                 const errorText = await response.text();
-                console.error("Error en la respuesta:", errorText); // Debug 5
-                throw new Error(`Error ${response.status}: ${errorText}`);
+                console.error("Error en la respuesta:", response.status, errorText);
+                throw new Error(`Error al buscar productos (${response.status})`);
             }
 
-            const products = await response.json();
-            console.log("Datos recibidos:", products); // Debug 6
-            currentProducts = products;
-            renderResults(products);
+            currentProducts = await response.json();
+            console.log("Productos recibidos:", currentProducts);
+
+            if (!Array.isArray(currentProducts)) {
+                throw new Error("Formato de respuesta inválido");
+            }
+
+            renderResults(currentProducts);
 
         } catch (error) {
-            console.error("Error completo:", error); // Debug 7
-            showInfoMessage(
-                `Error al buscar: ${error.message}`,
-                'danger'
-            );
+            console.error("Error en la búsqueda:", error);
+            showInfoMessage(error.message, 'danger');
+            currentProducts = [];
+            renderResults([]);
         } finally {
             restoreUIAfterSearch();
         }
     };
 
-    // --- Asignación de Eventos ---
-    searchForm.addEventListener('submit', startSearch);
-
-    // Eventos para ordenación
-    document.querySelectorAll('.sort-option').forEach(option => {
-        option.addEventListener('click', (e) => {
-            e.preventDefault();
-            sortProducts(e.target.dataset.sort);
-        });
-    });
-
-    // --- Funciones de Manipulación de la UI ---
-
+    // --- Funciones de Soporte ---
     function prepareUIForSearch() {
-        infoContainer.hidden = true;
-        resultsArea.hidden = true;
         loadingSpinner.hidden = false;
-        searchButton.disabled = true;
-        searchButton.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Buscando...';
+        resultsGrid.innerHTML = '';
+        infoMessage.hidden = true;
+        searchForm.querySelector('button').disabled = true;
     }
 
     function restoreUIAfterSearch() {
         loadingSpinner.hidden = true;
-        resultsArea.hidden = false;
-        searchButton.disabled = false;
-        searchButton.innerHTML = '<i class="bi bi-search me-2"></i>Buscar';
+        searchForm.querySelector('button').disabled = false;
+    }
+
+    function updateActiveSortButton() {
+        document.querySelectorAll('.sort-option').forEach(option => {
+            option.classList.toggle('active', option.dataset.sort === currentSort);
+        });
     }
 
     function sortProducts(sortMethod) {
-        currentSort = sortMethod;
+        if (!currentProducts.length) return;
 
-        // Actualizar UI del dropdown
-        document.querySelectorAll('.sort-option').forEach(option => {
-            option.classList.toggle('active', option.dataset.sort === sortMethod);
-        });
-
-        // Ordenar productos
         const sortedProducts = [...currentProducts].sort((a, b) => {
-            switch (sortMethod) {
-                case 'price-asc':
-                    return parsePrice(a.price) - parsePrice(b.price);
-                case 'price-desc':
-                    return parsePrice(b.price) - parsePrice(a.price);
-                case 'rating':
-                    return (b.rating || 0) - (a.rating || 0);
-                case 'store':
-                    return a.storeName.localeCompare(b.storeName);
-                default:
-                    return 0;
+            try {
+                const priceA = parsePrice(a.currentPrice);
+                const priceB = parsePrice(b.currentPrice);
+
+                switch (sortMethod) {
+                    case 'price-asc': return priceA - priceB;
+                    case 'price-desc': return priceB - priceA;
+                    case 'rating':
+                        return (b.rating || 0) - (a.rating || 0);
+                    case 'store':
+                        return (a.storeName || '').localeCompare(b.storeName || '');
+                    default: return 0;
+                }
+            } catch (error) {
+                console.error("Error al ordenar:", error);
+                return 0;
             }
         });
 
         renderResults(sortedProducts);
     }
 
-    function parsePrice(priceStr) {
-        return parseFloat(priceStr.replace(/[^\d.,]/g, '').replace(',', '.'));
-    }
-
     function renderResults(products) {
         resultsGrid.innerHTML = '';
 
-        if (products.length === 0) {
-            showInfoMessage(
-                'No encontramos productos con ese nombre. Intenta ser más específico o usar otras palabras clave.',
-                'info'
-            );
+        if (!Array.isArray(products)) {
+            showInfoMessage('Error al procesar los resultados', 'danger');
             return;
         }
 
-        // Actualizar contador de resultados
-        document.getElementById('results-count').textContent = `${products.length} resultados encontrados`;
+        resultsCount.textContent = products.length > 0
+            ? `${products.length} productos encontrados`
+            : '';
 
-        // Crear tarjetas para cada producto
+        if (products.length === 0) {
+            showInfoMessage('No se encontraron productos con ese nombre. Intenta con términos diferentes.', 'info');
+            return;
+        }
+
         products.forEach(product => {
-            resultsGrid.appendChild(createProductCard(product));
+            try {
+                const card = createProductCard(product);
+                if (card) resultsGrid.appendChild(card);
+            } catch (error) {
+                console.error("Error al crear tarjeta de producto:", product, error);
+            }
         });
     }
 
     function createProductCard(product) {
-        const cardClone = cardTemplate.content.cloneNode(true);
-        const card = cardClone.querySelector('.card');
+        if (!product || typeof product !== 'object') {
+            console.error("Producto inválido:", product);
+            return null;
+        }
 
-        // Llenar datos básicos
+        const card = cardTemplate.content.cloneNode(true).querySelector('.card');
+
+        // Datos básicos con valores por defecto
         const img = card.querySelector('img');
-        img.src = product.imageUrl || 'https://via.placeholder.com/300x200.png?text=Sin+Imagen';
-        img.alt = product.name;
+        img.src = product.imageUrl || 'https://via.placeholder.com/300x200?text=Sin+imagen';
+        img.alt = product.name || 'Producto sin nombre';
 
-        card.querySelector('.card-title').textContent = product.name;
-        card.querySelector('.store-name strong').textContent = product.storeName;
-        card.querySelector('.card-price').textContent = formatPrice(product.price);
-        card.querySelector('a').href = product.url;
+        card.querySelector('.card-title').textContent = product.name || 'Nombre no disponible';
+        card.querySelector('.store-name').textContent = product.storeName || 'Tienda desconocida';
 
-        // Configurar disponibilidad
-        const availabilityBadge = card.querySelector('.availability-badge');
-        if (product.available) {
-            availabilityBadge.className = 'badge availability-badge bg-success';
-            availabilityBadge.textContent = 'Disponible';
+        const priceElement = card.querySelector('.card-price');
+        priceElement.textContent = product.currentPrice !== undefined
+            ? formatPrice(product.currentPrice)
+            : 'Precio no disponible';
+
+        const link = card.querySelector('a');
+        if (product.productUrl) {
+            link.href = product.productUrl;
         } else {
-            availabilityBadge.className = 'badge availability-badge bg-danger';
-            availabilityBadge.textContent = 'Agotado';
+            link.style.pointerEvents = 'none';
+            link.classList.add('text-muted');
         }
 
-        // Configurar rating si existe
-        if (product.rating) {
-            const starsContainer = card.querySelector('.rating-stars');
-            starsContainer.innerHTML = generateRatingStars(product.rating);
+        // Disponibilidad
+        const availability = card.querySelector('.availability-badge');
+        if (product.available !== undefined) {
+            availability.className = `badge bg-${product.available ? 'success' : 'danger'}`;
+            availability.textContent = product.available ? 'Disponible' : 'Agotado';
+        } else {
+            availability.className = 'badge bg-secondary';
+            availability.textContent = 'Estado desconocido';
         }
 
-        // Configurar tiempo de actualización
-        if (product.updatedAt) {
-            card.querySelector('.time-ago').textContent = formatTimeAgo(product.updatedAt);
+        // Rating
+        const ratingContainer = card.querySelector('.rating-stars');
+        if (product.rating !== undefined && product.rating !== null) {
+            ratingContainer.innerHTML = generateRatingStars(product.rating);
+        } else {
+            ratingContainer.innerHTML = '<span class="text-muted">Sin valoraciones</span>';
         }
 
-        return cardClone;
+        return card;
+    }
+
+    // --- Funciones Utilitarias ---
+    function parsePrice(price) {
+        if (price === undefined || price === null) {
+            return 0;
+        }
+
+        if (typeof price === 'number') {
+            return price;
+        }
+
+        if (typeof price === 'string') {
+            // Elimina todo excepto números y punto decimal
+            const cleaned = price.replace(/[^\d.]/g, '');
+            return parseFloat(cleaned) || 0;
+        }
+
+        return 0;
     }
 
     function formatPrice(price) {
-        // Formatear precio como moneda
-        const number = parsePrice(price);
-        return new Intl.NumberFormat('es-MX', {
-            style: 'currency',
-            currency: 'MXN'
-        }).format(number);
-    }
-
-    function formatTimeAgo(dateString) {
-        // Implementar lógica para mostrar "hace X tiempo"
-        const date = new Date(dateString);
-        const now = new Date();
-        const diff = now - date;
-
-        const minutes = Math.floor(diff / (1000 * 60));
-        if (minutes < 60) return `hace ${minutes} min`;
-
-        const hours = Math.floor(minutes / 60);
-        if (hours < 24) return `hace ${hours} h`;
-
-        const days = Math.floor(hours / 24);
-        return `hace ${days} días`;
+        try {
+            const numericPrice = parsePrice(price);
+            return new Intl.NumberFormat('es-MX', {
+                style: 'currency',
+                currency: 'MXN'
+            }).format(numericPrice);
+        } catch (error) {
+            console.error("Error al formatear precio:", price, error);
+            return 'Precio no disponible';
+        }
     }
 
     function generateRatingStars(rating) {
-        // Generar estrellas basadas en el rating (0-5)
-        const fullStars = Math.floor(rating);
-        const hasHalfStar = rating % 1 >= 0.5;
-        let starsHTML = '';
+        const numericRating = Number(rating) || 0;
+        const clampedRating = Math.min(Math.max(numericRating, 0), 5);
+        const fullStars = Math.floor(clampedRating);
+        const hasHalfStar = clampedRating % 1 >= 0.5;
 
-        for (let i = 0; i < 5; i++) {
-            if (i < fullStars) {
-                starsHTML += '<i class="bi bi-star-fill"></i>';
-            } else if (i === fullStars && hasHalfStar) {
-                starsHTML += '<i class="bi bi-star-half"></i>';
-            } else {
-                starsHTML += '<i class="bi bi-star"></i>';
-            }
-        }
-
-        return starsHTML;
+        return Array.from({length: 5}, (_, i) => {
+            if (i < fullStars) return '<i class="bi bi-star-fill"></i>';
+            if (i === fullStars && hasHalfStar) return '<i class="bi bi-star-half"></i>';
+            return '<i class="bi bi-star"></i>';
+        }).join('');
     }
 
-    function showInfoMessage(message, type = 'info') {
-        infoContainer.hidden = false;
-        infoContainer.className = `alert alert-${type} alert-dismissible fade show`;
-        infoMessage.textContent = message;
+    function showInfoMessage(message, type) {
+        infoMessage.hidden = false;
+        infoMessage.className = `alert alert-${type} fade show`;
+        infoMessage.innerHTML = `
+            <div class="d-flex align-items-center">
+                <i class="bi ${type === 'danger' ? 'bi-exclamation-triangle' : type === 'warning' ? 'bi-exclamation-circle' : 'bi-info-circle'} me-2"></i>
+                <span>${message}</span>
+            </div>
+        `;
     }
 });
