@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Encuentra y compara precios de productos en tus tiendas favoritas">
+    <title>Buscador de Precios Inteligente | Compara y ahorra</title>
+
+    <!-- Preconexión para mejorar performance -->
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+
+    <!-- Librerías Externas -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Favicon -->
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+    <!-- Tu Hoja de Estilos Personalizada -->
+    <link rel="stylesheet" href="/css/style.css">
+
+    <!-- Preload para imágenes críticas -->
+    <link rel="preload" href="/images/hero-bg.webp" as="image">
+</head>
+<body class="d-flex flex-column min-vh-100">
+<!-- Barra de navegación -->
+<nav class="navbar navbar-expand-lg bg-body-tertiary sticky-top shadow-sm">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">
+            <i class="bi bi-graph-down-arrow text-primary me-2"></i>
+            BuscaPrecios
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="#como-funciona">Cómo funciona</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#tiendas">Tiendas</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#faq">Preguntas frecuentes</a>
+                </li>
+            </ul>
+            <div class="ms-lg-3 mt-2 mt-lg-0">
+                <button id="theme-toggle" class="btn btn-sm btn-outline-secondary">
+                    <i class="bi bi-moon-stars"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<header class="hero-section text-center py-5">
+    <div class="container py-4">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <h1 class="display-4 fw-bold mb-3">Encuentra los mejores precios en un solo lugar</h1>
+                <p class="lead mb-4">Compara precios en tiempo real de tus productos favoritos en las principales tiendas online.</p>
+                <div class="row justify-content-center">
+                    <div class="col-lg-8">
+                        <form id="search-form" class="needs-validation" novalidate>
+                            <div class="input-group shadow-lg rounded-pill">
+                                <input type="text" id="product-name-input" class="form-control form-control-lg rounded-pill-start"
+                                       placeholder="Ej: iPhone 15 Pro Max, PlayStation 5, etc." required
+                                       aria-label="Buscar producto" aria-describedby="search-button">
+                                <button id="search-button" class="btn btn-primary btn-lg px-4 rounded-pill-end" type="submit">
+                                    <i class="bi bi-search me-2"></i>Buscar
+                                </button>
+                            </div>
+                            <div class="invalid-feedback mt-2">
+                                Por favor ingresa un producto para buscar
+                            </div>
+                        </form>
+                        <div class="mt-3">
+                            <span class="text-muted small">Sugerencias: </span>
+                            <a href="#" class="suggestion-link small me-2">Smartphones</a>
+                            <a href="#" class="suggestion-link small me-2">Electrodomésticos</a>
+                            <a href="#" class="suggestion-link small me-2">Videojuegos</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="container my-5 flex-grow-1">
+    <!-- Sección de cómo funciona -->
+    <section id="como-funciona" class="py-5">
+        <div class="row text-center mb-4">
+            <div class="col">
+                <h2 class="fw-bold">Cómo funciona nuestro buscador</h2>
+                <p class="text-muted">Encuentra las mejores ofertas en 3 simples pasos</p>
+            </div>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-circle bg-primary bg-opacity-10 text-primary mb-3 mx-auto">
+                            <i class="bi bi-search fs-3"></i>
+                        </div>
+                        <h3 class="h5">1. Busca tu producto</h3>
+                        <p class="text-muted">Ingresa el nombre del producto que deseas comparar en nuestro buscador.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-circle bg-info bg-opacity-10 text-info mb-3 mx-auto">
+                            <i class="bi bi-arrow-down-up fs-3"></i>
+                        </div>
+                        <h3 class="h5">2. Compara precios</h3>
+                        <p class="text-muted">Revisa los resultados de diferentes tiendas ordenados por precio.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100 border-0 shadow-sm">
+                    <div class="card-body text-center p-4">
+                        <div class="icon-circle bg-success bg-opacity-10 text-success mb-3 mx-auto">
+                            <i class="bi bi-cart-check fs-3"></i>
+                        </div>
+                        <h3 class="h5">3. Ahorra dinero</h3>
+                        <p class="text-muted">Selecciona la mejor opción y compra al mejor precio disponible.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contenedor para mensajes de estado -->
+    <div id="info-container" class="alert alert-dismissible fade show" role="alert" hidden>
+        <span id="info-message"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <!-- Contenedor para el loader -->
+    <div id="loading-spinner" class="text-center my-5" hidden>
+        <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Cargando...</span>
+        </div>
+        <p class="mt-2">Buscando los mejores precios...</p>
+    </div>
+
+    <!-- Contenedor para los resultados -->
+    <section id="results-area" class="py-3" aria-live="polite">
+        <div class="row mb-3">
+            <div class="col">
+                <h2 class="h4 fw-bold">Resultados de búsqueda</h2>
+                <div class="d-flex justify-content-between align-items-center">
+                    <p id="results-count" class="text-muted small mb-0"></p>
+                    <div class="dropdown">
+                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button"
+                                id="sort-dropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                            Ordenar por
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="sort-dropdown">
+                            <li><button class="dropdown-item sort-option active" data-sort="price-asc">Menor precio</button></li>
+                            <li><button class="dropdown-item sort-option" data-sort="price-desc">Mayor precio</button></li>
+                            <li><button class="dropdown-item sort-option" data-sort="rating">Mejor valorados</button></li>
+                            <li><button class="dropdown-item sort-option" data-sort="store">Tienda (A-Z)</button></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="results-grid" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4"></div>
+    </section>
+
+    <!-- Sección de tiendas asociadas -->
+    <section id="tiendas" class="py-5 bg-light rounded-3 my-5">
+        <div class="container">
+            <div class="row text-center mb-4">
+                <div class="col">
+                    <h2 class="fw-bold">Tiendas asociadas</h2>
+                    <p class="text-muted">Compara precios en las principales tiendas online</p>
+                </div>
+            </div>
+            <div class="row g-3 justify-content-center">
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                    <div class="store-logo p-3 bg-white rounded-3 shadow-sm">
+                        <img src="https://via.placeholder.com/100x50?text=Amazon" alt="Amazon" class="img-fluid">
+                    </div>
+                </div>
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                    <div class="store-logo p-3 bg-white rounded-3 shadow-sm">
+                        <img src="https://via.placeholder.com/100x50?text=MercadoLibre" alt="MercadoLibre" class="img-fluid">
+                    </div>
+                </div>
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                    <div class="store-logo p-3 bg-white rounded-3 shadow-sm">
+                        <img src="https://via.placeholder.com/100x50?text=BestBuy" alt="BestBuy" class="img-fluid">
+                    </div>
+                </div>
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                    <div class="store-logo p-3 bg-white rounded-3 shadow-sm">
+                        <img src="https://via.placeholder.com/100x50?text=Walmart" alt="Walmart" class="img-fluid">
+                    </div>
+                </div>
+                <div class="col-6 col-sm-4 col-md-3 col-lg-2">
+                    <div class="store-logo p-3 bg-white rounded-3 shadow-sm">
+                        <img src="https://via.placeholder.com/100x50?text=Target" alt="Target" class="img-fluid">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de preguntas frecuentes -->
+    <section id="faq" class="py-5">
+        <div class="row text-center mb-4">
+            <div class="col">
+                <h2 class="fw-bold">Preguntas frecuentes</h2>
+                <p class="text-muted">Encuentra respuestas a las dudas más comunes</p>
+            </div>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
+                        <h3 class="accordion-header" id="headingOne">
+                            <button class="accordion-button" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                ¿Cómo actualizan los precios?
+                            </button>
+                        </h3>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                             data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Nuestro sistema actualiza los precios automáticamente varias veces al día para garantizar que siempre tengas la información más reciente. Sin embargo, te recomendamos verificar el precio final directamente en la tienda antes de realizar tu compra.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
+                        <h3 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                ¿Es gratuito el servicio?
+                            </button>
+                        </h3>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                             data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Sí, nuestro servicio es completamente gratuito para los usuarios. Nos mantenemos a través de acuerdos con las tiendas asociadas cuando realizas una compra a través de nuestros enlaces, sin que esto afecte el precio que pagas.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item border-0 shadow-sm mb-3 rounded-3 overflow-hidden">
+                        <h3 class="accordion-header" id="headingThree">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                    data-bs-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+                                ¿Puedo confiar en los precios mostrados?
+                            </button>
+                        </h3>
+                        <div id="collapseThree" class="accordion-collapse collapse" aria-labelledby="headingThree"
+                             data-bs-parent="#faqAccordion">
+                            <div class="accordion-body">
+                                Hacemos todo lo posible por mostrar precios precisos, pero ocasionalmente pueden ocurrir errores o los precios pueden cambiar rápidamente en las tiendas. Siempre verificamos múltiples fuentes y actualizamos frecuentemente, pero te recomendamos confirmar el precio final en la tienda antes de comprar.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<footer class="bg-dark text-white py-4 mt-auto">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-4 mb-4 mb-md-0">
+                <h3 class="h5 mb-3">BuscaPrecios</h3>
+                <p class="small text-muted">Tu comparador de precios confiable para encontrar las mejores ofertas en productos electrónicos, electrodomésticos y más.</p>
+            </div>
+            <div class="col-md-2 mb-4 mb-md-0">
+                <h3 class="h5 mb-3">Enlaces</h3>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted small">Inicio</a></li>
+                    <li class="mb-2"><a href="#como-funciona" class="text-decoration-none text-muted small">Cómo funciona</a></li>
+                    <li class="mb-2"><a href="#tiendas" class="text-decoration-none text-muted small">Tiendas</a></li>
+                    <li class="mb-2"><a href="#faq" class="text-decoration-none text-muted small">Preguntas frecuentes</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3 mb-4 mb-md-0">
+                <h3 class="h5 mb-3">Legal</h3>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted small">Términos de servicio</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted small">Política de privacidad</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted small">Cookies</a></li>
+                </ul>
+            </div>
+            <div class="col-md-3">
+                <h3 class="h5 mb-3">Contacto</h3>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><a href="mailto:info@buscaprecios.com" class="text-decoration-none text-muted small"><i class="bi bi-envelope me-2"></i>info@buscaprecios.com</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted small"><i class="bi bi-twitter me-2"></i>Twitter</a></li>
+                    <li class="mb-2"><a href="#" class="text-decoration-none text-muted small"><i class="bi bi-facebook me-2"></i>Facebook</a></li>
+                </ul>
+            </div>
+        </div>
+        <hr class="my-4 bg-secondary">
+        <div class="row">
+            <div class="col-md-6 text-center text-md-start">
+                <p class="small text-muted mb-0">&copy; 2023 BuscaPrecios. Todos los derechos reservados.</p>
+            </div>
+            <div class="col-md-6 text-center text-md-end">
+                <p class="small text-muted mb-0">Hecho con <i class="bi bi-heart-fill text-danger"></i> para ahorradores</p>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- Botón de volver arriba -->
+<button id="back-to-top" class="btn btn-primary rounded-circle shadow" aria-label="Volver arriba">
+    <i class="bi bi-arrow-up"></i>
+</button>
+
+<!-- Plantilla para una tarjeta de producto (oculta) -->
+<template id="product-card-template">
+    <div class="col product-card-wrapper">
+        <div class="card h-100 border-0 shadow-sm hover-shadow transition-all">
+            <div class="position-relative">
+                <img src="" class="card-img-top" alt="" loading="lazy">
+                <span class="position-absolute top-0 end-0 m-2 badge availability-badge"></span>
+            </div>
+            <div class="card-body d-flex flex-column">
+                <h3 class="card-title h5 flex-grow-1"></h3>
+                <p class="card-text mb-2 store-name"><i class="bi bi-shop me-2"></i><strong></strong></p>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <p class="card-price mb-0 fw-bold"></p>
+                    <div class="rating-stars text-warning small">
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-fill"></i>
+                        <i class="bi bi-star-half"></i>
+                    </div>
+                </div>
+                <a href="#" target="_blank" rel="noopener noreferrer" class="btn btn-outline-primary w-100 mt-auto stretched-link">
+                    Ver oferta <i class="bi bi-box-arrow-up-right ms-1"></i>
+                </a>
+            </div>
+            <div class="card-footer bg-transparent border-0 pt-0">
+                <p class="text-muted small mb-0"><i class="bi bi-clock-history me-1"></i> Actualizado <span class="time-ago"></span></p>
+            </div>
+        </div>
+    </div>
+</template>
+
+<!-- Modal para detalles extendidos -->
+<div class="modal fade" id="productDetailModal" tabindex="-1" aria-labelledby="productDetailModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title h5" id="productDetailModalLabel">Detalles del producto</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <img src="" class="img-fluid rounded mb-3" alt="" id="modal-product-image">
+                        <div class="d-grid gap-2">
+                            <a href="#" class="btn btn-primary" id="modal-product-link" target="_blank" rel="noopener noreferrer">
+                                <i class="bi bi-cart-plus me-2"></i>Ir a la tienda
+                            </a>
+                            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">
+                                <i class="bi bi-x-lg me-2"></i>Cerrar
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h3 class="h4 mb-3" id="modal-product-title"></h3>
+                        <div class="d-flex align-items-center mb-3">
+                            <span class="badge me-2" id="modal-product-badge"></span>
+                            <small class="text-muted" id="modal-product-store"></small>
+                        </div>
+                        <div class="mb-4">
+                            <h4 class="h2 fw-bold text-primary" id="modal-product-price"></h4>
+                            <small class="text-success" id="modal-product-discount"></small>
+                        </div>
+                        <div class="mb-4">
+                            <h4 class="h6 fw-bold">Descripción</h4>
+                            <p class="small text-muted" id="modal-product-description"></p>
+                        </div>
+                        <div class="row small">
+                            <div class="col-6 mb-2">
+                                <div><strong>SKU:</strong> <span id="modal-product-sku"></span></div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div><strong>Marca:</strong> <span id="modal-product-brand"></span></div>
+                            </div>
+                            <div class="col-6 mb-2">
+                                <div><strong>Actualizado:</strong> <span id="modal-product-updated"></span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Librerías JavaScript -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+
+<!-- Tu Lógica de JavaScript -->
+<script src="/js/app.js" defer></script>
+</body>
+</html>
