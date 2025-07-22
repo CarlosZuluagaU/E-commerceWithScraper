@@ -2,39 +2,50 @@
    Variables y Configuración Global
    ========================================================================== */
 :root {
-  /* Colores principales */
+  /* Paleta de colores principal */
   --primary: #4361ee;
   --primary-hover: #3a56d4;
+  --primary-light: #eef2ff;
   --secondary: #6c757d;
   --success: #28a745;
   --danger: #dc3545;
   --warning: #fd7e14;
   --info: #17a2b8;
   --light: #f8f9fa;
-  --dark: #343a40;
+  --dark: #212529;
 
-  /* Colores adicionales */
+  /* Colores de texto */
+  --text-primary: #212529;
+  --text-secondary: #495057;
   --text-muted: #6c757d;
+
+  /* Bordes y fondos */
   --border-color: #dee2e6;
+  --card-bg: #ffffff;
+  --body-bg: #f8f9fa;
+
+  /* Efectos */
   --card-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.05);
   --hover-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1);
+  --transition-base: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 
   /* Tipografía */
-  --font-family-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-family-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
   --font-size-base: 1rem;
   --line-height-base: 1.6;
 }
 
 /* Modo oscuro */
-[data-bs-theme="dark"] {
-  --body-bg: #212529;
-  --body-color: #f8f9fa;
-  --card-bg: #2c3034;
-  --border-color: #495057;
+[data-theme="dark"] {
+  --body-bg: #121212;
+  --card-bg: #1e1e1e;
+  --text-primary: #f8f9fa;
+  --text-secondary: #e9ecef;
   --text-muted: #adb5bd;
-  --light: #343a40;
-  --card-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
-  --hover-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.25);
+  --border-color: #2d2d2d;
+  --light: #2d2d2d;
+  --card-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
+  --hover-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.35);
 }
 
 /* ==========================================================================
@@ -44,39 +55,52 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 html {
   scroll-behavior: smooth;
+  scroll-padding-top: 80px; /* Para compensar el header fijo */
 }
 
 body {
   font-family: var(--font-family-sans);
   font-size: var(--font-size-base);
   line-height: var(--line-height-base);
-  color: var(--body-color);
+  color: var(--text-primary);
   background-color: var(--body-bg);
-  -webkit-text-size-adjust: 100%;
-  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
 }
 
 /* Tipografía mejorada */
-h1, h2, h3, h4, h5, h6,
-.h1, .h2, .h3, .h4, .h5, .h6 {
+h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   line-height: 1.2;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+  color: var(--text-primary);
 }
 
+h1 { font-size: 2.5rem; }
+h2 { font-size: 2rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.5rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1rem; }
+
 p {
-  margin-top: 0;
   margin-bottom: 1rem;
+  color: var(--text-secondary);
 }
 
 a {
   color: var(--primary);
   text-decoration: none;
-  transition: color 0.15s ease-in-out;
+  transition: var(--transition-base);
 }
 
 a:hover {
@@ -89,41 +113,39 @@ a:hover {
    ========================================================================== */
 
 /* Barra de navegación */
+.navbar {
+  background-color: var(--card-bg);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  z-index: 1030;
+}
+
 .navbar-brand {
   font-weight: 700;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .nav-link {
   font-weight: 500;
-  padding: 0.5rem 1rem;
+  padding: 0.75rem 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
-/* === CAMBIOS PARA LA IMAGEN DE FONDO === */
+/* Hero Section */
 .hero-section {
-    /* 1. Aplicamos la imagen de fondo con un degradado oscuro encima para legibilidad */
-    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/images/hero-bg.webp');
-    background-size: cover;
-    background-position: center;
-
-    /* 2. Ajustamos el texto para que sea legible sobre la imagen */
-    color: #ffffff; /* Hacemos el texto principal blanco */
-    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Sombra para legibilidad */
-
-    /* 3. Mantenemos tus otros estilos */
-    padding: 5rem 0;
-    position: relative;
-    overflow: hidden;
+  background: linear-gradient(135deg, rgba(67, 97, 238, 0.1) 0%, rgba(0, 0, 0, 0) 100%),
+              var(--body-bg);
+  padding: 6rem 0;
+  position: relative;
+  overflow: hidden;
 }
 
-/* El subtítulo se hace un poco más suave */
-[data-bs-theme="dark"] .hero-section .text-muted,
-.hero-section .text-muted {
-    color: #e9ecef !important;
-}
-
-/* El patrón de fondo SVG ya no es necesario con la imagen, así que lo comentamos para evitar un error 404 si no tienes el archivo. */
-/*
 .hero-section::before {
   content: '';
   position: absolute;
@@ -131,75 +153,100 @@ a:hover {
   left: 0;
   width: 100%;
   height: 100%;
-  background-image: url('/images/hero-pattern.svg');
-  background-size: cover;
-  opacity: 0.03;
+  background-image: radial-gradient(circle at 1px 1px, var(--border-color) 1px, transparent 0);
+  background-size: 20px 20px;
+  opacity: 0.1;
   z-index: -1;
 }
-*/
-/* === FIN DE LOS CAMBIOS === */
-
 
 /* Campo de búsqueda */
-#search-form .form-control {
+.search-container {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.search-input {
   padding: 1rem 1.5rem;
-  border-right: 0;
+  border: 2px solid var(--border-color);
+  transition: var(--transition-base);
 }
 
-#search-form .form-control:focus {
-  box-shadow: none;
+.search-input:focus {
   border-color: var(--primary);
+  box-shadow: 0 0 0 0.25rem rgba(67, 97, 238, 0.25);
 }
 
-#search-button {
-  padding-left: 2rem;
-  padding-right: 2rem;
+.search-button {
+  padding: 0 2rem;
+  background-color: var(--primary);
+  color: white;
+  border: none;
+  transition: var(--transition-base);
 }
 
-.suggestion-link {
-  color: var(--text-muted);
-  text-decoration: none;
+.search-button:hover {
+  background-color: var(--primary-hover);
 }
 
-.suggestion-link:hover {
-  color: var(--primary);
-  text-decoration: none;
-}
-
-/* Tarjetas de producto */
-.product-card-wrapper {
-  transition: transform 0.3s ease;
-}
-
-.product-card-wrapper:hover {
-  transform: translateY(-5px);
-}
-
-.card {
+/* Tarjetas de productos */
+.product-card {
   border: 1px solid var(--border-color);
   background-color: var(--card-bg);
-  transition: all 0.3s ease;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transition: var(--transition-base);
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-.card-img-container {
-  height: 180px;
+.product-card:hover {
+  transform: translateY(-0.5rem);
+  box-shadow: var(--hover-shadow);
+}
+
+.product-image-container {
+  height: 200px;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
+  padding: 1.5rem;
   background-color: var(--light);
+  position: relative;
   overflow: hidden;
 }
 
-.card-img-top {
+.product-image {
   max-height: 100%;
-  width: auto;
   max-width: 100%;
   object-fit: contain;
+  transition: transform 0.3s ease;
 }
 
-.card-title {
+.product-card:hover .product-image {
+  transform: scale(1.05);
+}
+
+.product-badge {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  font-size: 0.75rem;
+  padding: 0.35em 0.65em;
+  border-radius: 50rem;
+}
+
+.product-content {
+  padding: 1.5rem;
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -207,137 +254,139 @@ a:hover {
   min-height: 3em;
 }
 
-.card-price {
+.product-price {
   font-size: 1.25rem;
   font-weight: 700;
   color: var(--primary);
+  margin-top: auto;
 }
 
-.store-name {
-  color: var(--text-muted);
-}
-
-.availability-badge {
-  font-size: 0.75rem;
-  padding: 0.35em 0.65em;
-}
-
-/* Badges de disponibilidad */
-.badge.bg-success {
-  background-color: var(--success) !important;
-}
-
-.badge.bg-warning {
-  background-color: var(--warning) !important;
-}
-
-.badge.bg-danger {
-  background-color: var(--danger) !important;
-}
-
-/* Iconos circulares */
-.icon-circle {
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  display: flex;
+/* Botones */
+.btn {
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  transition: var(--transition-base);
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0.5rem;
 }
 
-/* Rating */
-.rating-stars {
-  letter-spacing: 0.25em;
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+  color: white;
 }
 
-/* Botón volver arriba */
-#back-to-top {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  width: 50px;
-  height: 50px;
-  display: none;
-  z-index: 99;
+.btn-primary:hover {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+  transform: translateY(-2px);
 }
 
 /* Loader */
-.spinner-border {
+.loader {
   width: 3rem;
   height: 3rem;
+  border-width: 0.25em;
+  color: var(--primary);
 }
 
 /* Alertas */
-#info-container {
-  position: fixed;
-  top: 20px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 9999;
-  min-width: 300px;
+.alert {
+  padding: 1rem 1.5rem;
+  border-radius: 0.5rem;
+  box-shadow: var(--card-shadow);
 }
 
-/* Modal de detalles */
+/* Modal */
 .modal-content {
   border: none;
+  border-radius: 0.75rem;
+  overflow: hidden;
   box-shadow: var(--hover-shadow);
+}
+
+/* Footer */
+.footer {
+  background-color: var(--card-bg);
+  padding: 3rem 0;
+  margin-top: auto;
 }
 
 /* ==========================================================================
    Utilidades Personalizadas
    ========================================================================== */
-.hover-shadow {
-  transition: box-shadow 0.3s ease;
+.rounded-lg {
+  border-radius: 0.75rem;
 }
 
-.hover-shadow:hover {
-  box-shadow: var(--hover-shadow);
+.shadow-lg {
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1);
 }
 
-.transition-all {
-  transition: all 0.3s ease;
+.hover-scale {
+  transition: var(--transition-base);
 }
 
-.rounded-pill-start {
-  border-top-right-radius: 0 !important;
-  border-bottom-right-radius: 0 !important;
-}
-
-.rounded-pill-end {
-  border-top-left-radius: 0 !important;
-  border-bottom-left-radius: 0 !important;
+.hover-scale:hover {
+  transform: scale(1.03);
 }
 
 /* ==========================================================================
    Media Queries
    ========================================================================== */
+@media (max-width: 991.98px) {
+  .hero-section {
+    padding: 4rem 0;
+  }
+
+  h1 {
+    font-size: 2rem;
+  }
+
+  h2 {
+    font-size: 1.75rem;
+  }
+}
+
 @media (max-width: 767.98px) {
+  .navbar-brand {
+    font-size: 1.25rem;
+  }
+
   .hero-section {
     padding: 3rem 0;
   }
 
-  .hero-section h1 {
-    font-size: 2rem;
-  }
-
-  .card-img-container {
-    height: 150px;
+  .product-image-container {
+    height: 160px;
   }
 }
 
 @media (max-width: 575.98px) {
-  #search-form .input-group {
+  .search-container {
     flex-direction: column;
+    gap: 0.5rem;
   }
 
-  #search-form .form-control {
-    border-radius: 0.375rem !important;
-    margin-bottom: 0.5rem;
-    border-right: 1px solid var(--border-color) !important;
-  }
-
-  #search-button {
+  .search-input {
     width: 100%;
-    border-radius: 0.375rem !important;
+    border-radius: 0.5rem !important;
+  }
+
+  .search-button {
+    width: 100%;
+    border-radius: 0.5rem !important;
+  }
+
+  .product-image-container {
+    height: 140px;
+    padding: 1rem;
+  }
+
+  .product-content {
+    padding: 1rem;
   }
 }

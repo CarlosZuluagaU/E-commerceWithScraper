@@ -1,247 +1,190 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // --- Elementos del DOM ---
-    const searchForm = document.getElementById('search-form');
-    const productNameInput = document.getElementById('product-name-input');
-    const resultsGrid = document.getElementById('results-grid');
-    const loadingSpinner = document.getElementById('loading-spinner');
-    const infoMessage = document.getElementById('info-message');
-    const cardTemplate = document.getElementById('product-card-template');
-    const resultsCount = document.getElementById('results-count');
+  // --- 1. Elementos HTML ---
+  const searchForm = document.getElementById('search-form');
+  const searchInput = document.getElementById('product-name-input');
+  const searchButton = document.getElementById('search-button');
+  const resultsGrid = document.getElementById('results-grid');
+  const productCardTemplate = document.getElementById('product-card-template');
+  const infoContainer = document.getElementById('info-container');
+  const infoMessage = document.getElementById('info-message');
+  const loadingSpinner = document.getElementById('loading-spinner');
+  const resultsCountDisplay = document.getElementById('results-count');
 
-    // --- Variables de Estado ---
-    let currentProducts = [];
-    let currentSort = 'price-asc';
+  // --- 2. Funciones de Utilidad para UI ---
 
-    // --- Event Listeners ---
-    searchForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        await startSearch();
+  const showMessage = (type, message, dismissible = true) => {
+    if (infoContainer && infoMessage) {
+      infoContainer.hidden = false;
+      infoMessage.textContent = message;
+
+      // Resetear clases
+      infoContainer.className = 'alert alert-dismissible fade show mt-3';
+
+      if (type === 'success') {
+        infoContainer.classList.add('alert-success');
+      } else if (type === 'error') {
+        infoContainer.classList.add('alert-danger');
+      } else if (type === 'info') {
+        infoContainer.classList.add('alert-info');
+      }
+
+      let closeBtn = infoContainer.querySelector('.btn-close');
+
+      if (dismissible) {
+        if (!closeBtn) {
+          closeBtn = document.createElement('button');
+          closeBtn.type = 'button';
+          closeBtn.className = 'btn-close';
+          closeBtn.setAttribute('data-bs-dismiss', 'alert');
+          closeBtn.setAttribute('aria-label', 'Close');
+          infoContainer.appendChild(closeBtn);
+        }
+      } else {
+        if (closeBtn) closeBtn.remove();
+      }
+    }
+  };
+
+  const hideMessage = () => {
+    if (infoContainer) {
+      infoContainer.hidden = true;
+      infoMessage.textContent = '';
+    }
+  };
+
+  const showLoading = () => {
+    if (loadingSpinner) loadingSpinner.hidden = false;
+    resultsGrid.innerHTML = '';
+    resultsCountDisplay.textContent = '';
+    hideMessage();
+  };
+
+  const hideLoading = () => {
+    if (loadingSpinner) loadingSpinner.hidden = true;
+  };
+
+  const renderProducts = (products) => {
+    resultsGrid.innerHTML = '';
+
+    if (products.length === 0) {
+      showMessage('info', `No se encontraron productos para "${searchInput.value.trim()}".`);
+      resultsCountDisplay.textContent = '0 resultados';
+      return;
+    }
+
+    products.forEach(product => {
+      const productCardClone = productCardTemplate.content.cloneNode(true);
+
+      const cardWrapper = productCardClone.querySelector('.product-card-wrapper');
+      const cardImg = productCardClone.querySelector('.card-img-top');
+      const cardTitle = productCardClone.querySelector('.card-title');
+      const storeName = productCardClone.querySelector('.store-name strong');
+      const cardPrice = productCardClone.querySelector('.card-price');
+      const viewOfferLink = productCardClone.querySelector('.btn.stretched-link');
+
+      if (cardImg) {
+        cardImg.src = product.imageUrl || 'https://via.placeholder.com/250x180?text=Imagen+No+Disp.';
+        cardImg.alt = product.name || 'Producto';
+      }
+
+      if (cardTitle) cardTitle.textContent = product.name || 'Nombre de Producto Desconocido';
+      if (storeName) storeName.textContent = product.store || 'Tienda Desconocida';
+      if (cardPrice) cardPrice.textContent = product.price || 'Precio N/A';
+      if (viewOfferLink) viewOfferLink.href = product.productUrl || '#';
+
+      resultsGrid.appendChild(cardWrapper);
     });
 
-    document.querySelectorAll('.sort-option').forEach(option => {
-        option.addEventListener('click', (e) => {
-            e.preventDefault();
-            currentSort = e.target.dataset.sort;
-            updateActiveSortButton();
-            sortProducts(currentSort);
-        });
+    showMessage('success', `Se encontraron ${products.length} resultados.`);
+    resultsCountDisplay.textContent = `${products.length} resultados`;
+  };
+
+  // --- 3. Lógica Principal de Búsqueda ---
+
+  const handleSearch = async (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const query = searchInput.value.trim();
+
+    if (!query) {
+      searchForm.classList.add('was-validated');
+      hideLoading();
+      resultsGrid.innerHTML = '';
+      resultsCountDisplay.textContent = '';
+      showMessage('info', 'Por favor ingresa un producto para buscar.');
+      return;
+    }
+
+    searchForm.classList.remove('was-validated');
+    showLoading();
+
+    try {
+      const response = await fetch(`http://localhost:8080/api/products/search?name=${encodeURIComponent(query)}`);
+
+      if (!response.ok) {
+        let errorMessageText = `Error al buscar productos (Estado: ${response.status}).`;
+        try {
+          const errorData = await response.json();
+          if (errorData?.message) {
+            errorMessageText = errorData.message;
+          } else if (typeof errorData === 'string') {
+            errorMessageText = errorData;
+          }
+        } catch {
+          errorMessageText = `Error al buscar productos (Estado: ${response.status} - ${response.statusText}).`;
+        }
+        throw new Error(errorMessageText);
+      }
+
+      const products = await response.json();
+      console.log("Productos recibidos:", products);
+
+      renderProducts(products);
+    } catch (error) {
+      console.error("Error en la búsqueda:", error);
+      showMessage('error', `Error en la búsqueda: ${error.message}`);
+      resultsGrid.innerHTML = '';
+      resultsCountDisplay.textContent = '';
+    } finally {
+      hideLoading();
+    }
+  };
+
+  // --- 4. Asignar Eventos ---
+
+  searchForm.addEventListener('submit', handleSearch);
+
+  document.querySelectorAll('.suggestion-link').forEach(link => {
+    link.addEventListener('click', (event) => {
+      event.preventDefault();
+      searchInput.value = event.target.textContent;
+      handleSearch(event);
+    });
+  });
+
+  const themeToggle = document.getElementById('theme-toggle');
+  if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-bs-theme');
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-bs-theme', newTheme);
+      // localStorage.setItem('theme', newTheme); // Descomenta si quieres guardar la preferencia
+    });
+  }
+
+  const backToTopButton = document.getElementById('back-to-top');
+  if (backToTopButton) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 300) {
+        backToTopButton.classList.add('show');
+      } else {
+        backToTopButton.classList.remove('show');
+      }
     });
 
-    // --- Funciones Principales ---
-    const startSearch = async () => {
-        const productName = productNameInput.value.trim();
-
-        if (!productName) {
-            showInfoMessage('Por favor, ingresa un nombre de producto.', 'warning');
-            return;
-        }
-
-        prepareUIForSearch();
-
-        try {
-            console.log("Iniciando búsqueda de:", productName);
-            const response = await fetch(`/api/products/search?name=${encodeURIComponent(productName)}`);
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error("Error en la respuesta:", response.status, errorText);
-                throw new Error(`Error al buscar productos (${response.status})`);
-            }
-
-            currentProducts = await response.json();
-            console.log("Productos recibidos:", currentProducts);
-
-            if (!Array.isArray(currentProducts)) {
-                throw new Error("Formato de respuesta inválido");
-            }
-
-            renderResults(currentProducts);
-
-        } catch (error) {
-            console.error("Error en la búsqueda:", error);
-            showInfoMessage(error.message, 'danger');
-            currentProducts = [];
-            renderResults([]);
-        } finally {
-            restoreUIAfterSearch();
-        }
-    };
-
-    // --- Funciones de Soporte ---
-    function prepareUIForSearch() {
-        loadingSpinner.hidden = false;
-        resultsGrid.innerHTML = '';
-        infoMessage.hidden = true;
-        searchForm.querySelector('button').disabled = true;
-    }
-
-    function restoreUIAfterSearch() {
-        loadingSpinner.hidden = true;
-        searchForm.querySelector('button').disabled = false;
-    }
-
-    function updateActiveSortButton() {
-        document.querySelectorAll('.sort-option').forEach(option => {
-            option.classList.toggle('active', option.dataset.sort === currentSort);
-        });
-    }
-
-    function sortProducts(sortMethod) {
-        if (!currentProducts.length) return;
-
-        const sortedProducts = [...currentProducts].sort((a, b) => {
-            try {
-                const priceA = parsePrice(a.currentPrice);
-                const priceB = parsePrice(b.currentPrice);
-
-                switch (sortMethod) {
-                    case 'price-asc': return priceA - priceB;
-                    case 'price-desc': return priceB - priceA;
-                    case 'rating':
-                        return (b.rating || 0) - (a.rating || 0);
-                    case 'store':
-                        return (a.storeName || '').localeCompare(b.storeName || '');
-                    default: return 0;
-                }
-            } catch (error) {
-                console.error("Error al ordenar:", error);
-                return 0;
-            }
-        });
-
-        renderResults(sortedProducts);
-    }
-
-    function renderResults(products) {
-        resultsGrid.innerHTML = '';
-
-        if (!Array.isArray(products)) {
-            showInfoMessage('Error al procesar los resultados', 'danger');
-            return;
-        }
-
-        resultsCount.textContent = products.length > 0
-            ? `${products.length} productos encontrados`
-            : '';
-
-        if (products.length === 0) {
-            showInfoMessage('No se encontraron productos con ese nombre. Intenta con términos diferentes.', 'info');
-            return;
-        }
-
-        products.forEach(product => {
-            try {
-                const card = createProductCard(product);
-                if (card) resultsGrid.appendChild(card);
-            } catch (error) {
-                console.error("Error al crear tarjeta de producto:", product, error);
-            }
-        });
-    }
-
-    function createProductCard(product) {
-        if (!product || typeof product !== 'object') {
-            console.error("Producto inválido:", product);
-            return null;
-        }
-
-        const card = cardTemplate.content.cloneNode(true).querySelector('.card');
-
-        // Datos básicos con valores por defecto
-        const img = card.querySelector('img');
-        img.src = product.imageUrl || 'https://via.placeholder.com/300x200?text=Sin+imagen';
-        img.alt = product.name || 'Producto sin nombre';
-
-        card.querySelector('.card-title').textContent = product.name || 'Nombre no disponible';
-        card.querySelector('.store-name').textContent = product.storeName || 'Tienda desconocida';
-
-        const priceElement = card.querySelector('.card-price');
-        priceElement.textContent = product.currentPrice !== undefined
-            ? formatPrice(product.currentPrice)
-            : 'Precio no disponible';
-
-        const link = card.querySelector('a');
-        if (product.productUrl) {
-            link.href = product.productUrl;
-        } else {
-            link.style.pointerEvents = 'none';
-            link.classList.add('text-muted');
-        }
-
-        // Disponibilidad
-        const availability = card.querySelector('.availability-badge');
-        if (product.available !== undefined) {
-            availability.className = `badge bg-${product.available ? 'success' : 'danger'}`;
-            availability.textContent = product.available ? 'Disponible' : 'Agotado';
-        } else {
-            availability.className = 'badge bg-secondary';
-            availability.textContent = 'Estado desconocido';
-        }
-
-        // Rating
-        const ratingContainer = card.querySelector('.rating-stars');
-        if (product.rating !== undefined && product.rating !== null) {
-            ratingContainer.innerHTML = generateRatingStars(product.rating);
-        } else {
-            ratingContainer.innerHTML = '<span class="text-muted">Sin valoraciones</span>';
-        }
-
-        return card;
-    }
-
-    // --- Funciones Utilitarias ---
-    function parsePrice(price) {
-        if (price === undefined || price === null) {
-            return 0;
-        }
-
-        if (typeof price === 'number') {
-            return price;
-        }
-
-        if (typeof price === 'string') {
-            // Elimina todo excepto números y punto decimal
-            const cleaned = price.replace(/[^\d.]/g, '');
-            return parseFloat(cleaned) || 0;
-        }
-
-        return 0;
-    }
-
-    function formatPrice(price) {
-        try {
-            const numericPrice = parsePrice(price);
-            return new Intl.NumberFormat('es-MX', {
-                style: 'currency',
-                currency: 'MXN'
-            }).format(numericPrice);
-        } catch (error) {
-            console.error("Error al formatear precio:", price, error);
-            return 'Precio no disponible';
-        }
-    }
-
-    function generateRatingStars(rating) {
-        const numericRating = Number(rating) || 0;
-        const clampedRating = Math.min(Math.max(numericRating, 0), 5);
-        const fullStars = Math.floor(clampedRating);
-        const hasHalfStar = clampedRating % 1 >= 0.5;
-
-        return Array.from({length: 5}, (_, i) => {
-            if (i < fullStars) return '<i class="bi bi-star-fill"></i>';
-            if (i === fullStars && hasHalfStar) return '<i class="bi bi-star-half"></i>';
-            return '<i class="bi bi-star"></i>';
-        }).join('');
-    }
-
-    function showInfoMessage(message, type) {
-        infoMessage.hidden = false;
-        infoMessage.className = `alert alert-${type} fade show`;
-        infoMessage.innerHTML = `
-            <div class="d-flex align-items-center">
-                <i class="bi ${type === 'danger' ? 'bi-exclamation-triangle' : type === 'warning' ? 'bi-exclamation-circle' : 'bi-info-circle'} me-2"></i>
-                <span>${message}</span>
-            </div>
-        `;
-    }
+    backToTopButton.addEventListener('click', () => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
 });
